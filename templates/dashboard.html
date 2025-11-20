@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-10">
+
+        <!-- USER CARD -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body d-flex align-items-center">
+
+                {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" 
+                     class="rounded-circle me-3" 
+                     width="60" height="60" alt="User Avatar">
+                {% endif %}
+
+                <div>
+                    <h5 class="mb-0">{{ user.name }}</h5>
+                    <small class="text-muted">{{ user.email }}</small>
+                </div>
+
+                <div class="ms-auto">
+                    <a href="/logout" class="btn btn-outline-danger btn-sm">Logout</a>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- USERS LIST -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">All Users</h5>
+            </div>
+            <div class="card-body">
+
+                {% if users %}
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Provider</th>
+                        <th>Last Login</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for u in users %}
+                        <tr>
+                            <td>{{ u.name }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>{{ u.provider }}</td>
+                            <td>{{ u.last_login }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p class="text-muted">No users found.</p>
+                {% endif %}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

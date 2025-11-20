@@ -1,22 +1,20 @@
-from flask import Flask, jsonify, make_response
+from flask import Flask, render_template
+from config import Config
+from extensions import db, migrate
 
-app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
+    db.init_app(app)
+    migrate.init_app(app, db)
 
-@app.route("/")
-def hello_from_root():
-    return jsonify(message='Hello from root!')
+    @app.route("/")
+    def index():
+        return render_template("index.html")
 
-
-@app.route("/hello")
-def hello():
-    return jsonify(message='Hello from path!')
-
-
-@app.errorhandler(404)
-def resource_not_found(e):
-    return make_response(jsonify(error='Not found!'), 404)
-
+    return app
 
 if __name__ == "__main__":
+    app = create_app()
     app.run(debug=True)
