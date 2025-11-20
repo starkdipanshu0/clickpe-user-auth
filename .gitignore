@@ -1,0 +1,55 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+.venv/
+ENV/
+env.bak/
+env/
+
+# Flask and Python specific
+instance/
+*.db
+*.sqlite3
+
+# Flask cache
+*.log
+
+# Serverless Framework
+.serverless/
+
+# MacOS files
+.DS_Store
+
+# VS Code settings
+.vscode/
+
+# Pytest cache
+.pytest_cache/
+
+# mypy
+.mypy_cache/
+
+# Pylint
+.pylint.d/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+
+# Test result logs
+test-output/
+
+# Python egg info
+*.egg-info/
+.eggs/
+dist/
+build/
+node_modules/
