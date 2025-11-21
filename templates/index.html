@@ -14,12 +14,12 @@
                 </p>
 
                 <!-- GOOGLE LOGIN BUTTON -->
-                <a href="/auth/google/start" class="btn btn-danger w-100 mb-3">
+                <a href="{{ url_for('auth.google_start') }}" class="btn btn-danger w-100 mb-3">
                     <i class="bi bi-google"></i> Sign in with Google
                 </a>
 
                 <!-- GITHUB LOGIN BUTTON -->
-                <a href="/auth/github/start" class="btn btn-dark w-100 mb-3">
+                <a href="{{ url_for('auth.github_start') }}" class="btn btn-dark w-100 mb-3">
                     <i class="bi bi-github"></i> Sign in with GitHub
                 </a>
 

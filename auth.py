@@ -5,15 +5,15 @@ from flask import Blueprint, redirect, url_for, make_response, request, current_
 from extensions import db, oauth
 from models import User
 
-
 auth = Blueprint("auth", __name__)
-
 
 # ------------------------------------------
 # GOOGLE LOGIN
 # ------------------------------------------
 @auth.route("/auth/google/start")
 def google_start():
+    # Force HTTPS scheme for the callback if not in debug mode (optional but safer for OAuth)
+    # relying on ProxyFix from app.py is usually enough, but this is explicit.
     redirect_uri = url_for("auth.google_callback", _external=True)
     return oauth.google.authorize_redirect(redirect_uri)
 
@@ -24,7 +24,6 @@ def google_callback():
     userinfo = token.get("userinfo")
 
     if not userinfo:
-        # Fallback to ID token parsing (rare cases)
         userinfo = oauth.google.parse_id_token(token)
 
     google_id = userinfo["sub"]
@@ -51,8 +50,19 @@ def google_callback():
 
     encoded = _generate_jwt("google", google_id, email)
 
-    resp = make_response(redirect("/dashboard"))
-    resp.set_cookie("access_token", encoded, httponly=True, samesite="Lax")
+    # --- CHANGE 1: Use url_for instead of hardcoded string ---
+    resp = make_response(redirect(url_for("dashboard")))
+    
+    # --- CHANGE 2: Add secure=True for HTTPS production apps ---
+    # This ensures the cookie is only sent over encrypted connections.
+    is_production = not current_app.debug
+    resp.set_cookie(
+        "access_token", 
+        encoded, 
+        httponly=True, 
+        samesite="Lax", 
+        secure=is_production  # Only set Secure=True if not debugging locally
+    )
     return resp
 
 
@@ -69,7 +79,6 @@ def github_start():
 def github_callback():
     token = oauth.github.authorize_access_token()
 
-    # Basic user info
     user_data = oauth.github.get("user").json()
     emails = oauth.github.get("user/emails").json()
 
@@ -77,7 +86,6 @@ def github_callback():
     name = user_data.get("name") or user_data.get("login")
     avatar = user_data.get("avatar_url")
 
-    # find primary verified email
     email = None
     for e in emails:
         if e.get("primary") and e.get("verified"):
@@ -86,7 +94,6 @@ def github_callback():
     if not email and emails:
         email = emails[0]["email"]
 
-    # Upsert user
     user = User.query.filter_by(id=github_id, provider="github").first()
     if not user:
         user = User(
@@ -105,18 +112,28 @@ def github_callback():
 
     encoded = _generate_jwt("github", github_id, email)
 
-    resp = make_response(redirect("/dashboard"))
-    resp.set_cookie("access_token", encoded, httponly=True, samesite="Lax")
+    # --- CHANGE 1: Use url_for here too ---
+    resp = make_response(redirect(url_for("dashboard")))
+    
+    # --- CHANGE 2: Secure cookie ---
+    is_production = not current_app.debug
+    resp.set_cookie(
+        "access_token", 
+        encoded, 
+        httponly=True, 
+        samesite="Lax", 
+        secure=is_production
+    )
     return resp
 
 @auth.route("/logout")
 def logout():
-    resp = redirect("/")
+    # --- CHANGE 1: Use url_for("index") instead of "/" ---
+    resp = redirect(url_for("index"))
     resp.set_cookie("access_token", "", expires=0)
     return resp
-# ------------------------------------------
-# Helper: Generate JWT
-# ------------------------------------------
+
+# ... (Helper function remains the same)
 def _generate_jwt(provider, uid, email):
     payload = {
         "sub": uid,
@@ -129,8 +146,6 @@ def _generate_jwt(provider, uid, email):
         current_app.config["JWT_SECRET"],
         algorithm="HS256"
     )
-    # pyjwt may return bytes in some envs — ensure it's a str
     if isinstance(token, bytes):
         token = token.decode()
     return token
-

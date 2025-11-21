@@ -21,7 +21,7 @@ instance/
 
 # Serverless Framework
 .serverless/
-
+secrets.json
 # MacOS files
 .DS_Store
 
@@ -53,3 +53,4 @@ test-output/
 dist/
 build/
 node_modules/
+.yml
